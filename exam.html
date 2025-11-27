@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Location Share</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+        #status { font-size: 18px; margin: 20px; }
+        #location { font-size: 16px; color: red; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Emergency Location Sharing</h1>
+    <p>If you're in an emergency, this page will attempt to share your location. Grant permission when prompted.</p>
+    <div id="status">Status: Loading...</div>
+    <div id="location"></div>
+    <button onclick="retryLocation()">Retry Location</button>
+    <p><small>Disclaimer: Location data is for emergency use only. Sharing is simulated here.</small></p>
+
+    <script>
+        // Function to get and display location
+        function getLocation() {
+            document.getElementById('status').textContent = 'Status: Requesting location permission...';
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                });
+            } else {
+                document.getElementById('status').textContent = 'Status: Geolocation not supported by this browser.';
+            }
+        }
+
+        function showPosition(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            const accuracy = position.coords.accuracy;
+            document.getElementById('location').textContent = `Location Shared: Latitude ${lat}, Longitude ${lon} (Accuracy: ±${accuracy}m)`;
+            document.getElementById('status').textContent = 'Status: Location shared successfully!';
+
+            // Simulate sharing (log to console; replace with real API call)
+            console.log(`Emergency Location: Lat ${lat}, Lon ${lon}`);
+            // Example for real sharing: Send to a server
+            // fetch('https://your-server.com/api/share-location', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({ lat, lon, timestamp: Date.now() })
+            // });
+
+            // Optional: Open in Google Maps
+            const mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
+            document.getElementById('location').innerHTML += `<br><a href="${mapsLink}" target="_blank">View on Map</a>`;
+        }
+
+        function showError(error) {
+            let message = 'Status: Error getting location.';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    message = 'Status: Location permission denied. Please allow access.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message = 'Status: Location unavailable.';
+                    break;
+                case error.TIMEOUT:
+                    message = 'Status: Location request timed out.';
+                    break;
+            }
+            document.getElementById('status').textContent = message;
+        }
+
+        function retryLocation() {
+            getLocation();
+        }
+
+        // Auto-trigger on page load (simulates emergency link click)
+        window.onload = getLocation;
+    </script>
+</body>
+</html>
